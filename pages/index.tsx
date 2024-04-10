@@ -6,15 +6,13 @@ import {
   getAllTweetsQuery,
   getSignedURLForTweetQuery,
 } from "@/graphql/query/tweet";
-import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
 import { useCreateTweet, useGetAllTweets } from "@/hooks/tweet";
 import { useCurrentUser } from "@/hooks/user";
-import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { GetServerSideProps } from "next";
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { BiImageAlt } from "react-icons/bi";
 
@@ -24,10 +22,9 @@ interface HomeProps {
 
 export default function Home(props: HomeProps) {
   const { user } = useCurrentUser();
+  const { mutateAsync } = useCreateTweet();
 
-  const queryClient = useQueryClient();
-
-  const { mutate } = useCreateTweet();
+  const { tweets = props.tweets as Tweet[] } = useGetAllTweets();
 
   const [content, setContent] = useState("");
   const [imageURL, setImageURL] = useState("");
@@ -73,11 +70,14 @@ export default function Home(props: HomeProps) {
     input.click();
   }, [handleInputChangeFile]);
 
-  const handleCreateTweet = useCallback(() => {
-    mutate({
+  const handleCreateTweet = useCallback(async () => {
+    await mutateAsync({
       content,
+      imageURL,
     });
-  }, [content, mutate]);
+    setContent("");
+    setImageURL("");
+  }, [content, mutateAsync, imageURL]);
 
   return (
     <div>
@@ -100,7 +100,7 @@ export default function Home(props: HomeProps) {
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full bg-transparent text-xl px-3 border-slate-700"
+                  className="w-full bg-transparent text-xl px-3 border-b border-slate-700"
                   placeholder="What's happening?"
                   rows={3}
                 ></textarea>
@@ -125,10 +125,9 @@ export default function Home(props: HomeProps) {
             </div>
           </div>
         </div>
-        {props &&
-          props.tweets?.map((tweet) =>
-            tweet ? <FeedCard key={tweet?.id} data={tweet as Tweet} /> : null
-          )}
+        {tweets?.map((tweet) =>
+          tweet ? <FeedCard key={tweet?.id} data={tweet as Tweet} /> : null
+        )}
       </TwitterLayout>
     </div>
   );
