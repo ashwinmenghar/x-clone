@@ -122,7 +122,7 @@ export default function Home(props: HomeProps) {
 
     setTweetData((prev) => [...prev, ...(result?.getTweetPerPage as Tweet[])]);
     setPage(nextPage);
-  }, [page]);
+  }, [page, isMoreData]);
 
   useEffect(() => {
     if (inView) loadMoreTweets();
