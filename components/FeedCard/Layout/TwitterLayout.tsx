@@ -166,34 +166,34 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
     );
   };
 
-  const handleNewsData = async () => {
-    if (news && news?.articles && news?.articles?.length > 0) return;
-    const newsData = getItemWithExpiration("__news_data");
-
-    if (newsData != null) {
-      setNews(JSON.parse(newsData) as any);
-      return;
-    }
-
-    if (newsData == null) {
-      const data = await fetch(
-        `https://newsapi.org/v2/everything?q=tesla&from=2024-03-22&sortBy=publishedAt&apiKey=${process.env.NEXT_PUBLIC_NEWS_API_KEY}&pageSize=10`
-      )
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.status == "ok") {
-            setItemWithExpiration("__news_data", JSON.stringify(data), 30);
-            setNews(data);
-          }
-        })
-        .catch((err) => console.log(err));
-      setNews(data as any);
-    }
-  };
-
   useEffect(() => {
+    const handleNewsData = async () => {
+      if (news && news?.articles && news?.articles?.length > 0) return;
+      const newsData = getItemWithExpiration("__news_data");
+
+      if (newsData != null) {
+        setNews(JSON.parse(newsData) as any);
+        return;
+      }
+
+      if (newsData == null) {
+        const data = await fetch(
+          `https://newsapi.org/v2/everything?q=tesla&from=2024-03-22&sortBy=publishedAt&apiKey=${process.env.NEXT_PUBLIC_NEWS_API_KEY}&pageSize=10`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.status == "ok") {
+              setItemWithExpiration("__news_data", JSON.stringify(data), 30);
+              setNews(data);
+            }
+          })
+          .catch((err) => console.log(err));
+        setNews(data as any);
+      }
+    };
+
     handleNewsData();
-  }, [!news]);
+  }, [news]);
 
   return (
     <div>

@@ -24,20 +24,18 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
   const [like, setLike] = useState(false);
   const [likeId, setLikeId] = useState("");
 
-  if (data?.likes) {
-    useEffect(() => {
-      if (user == null) setLike(false);
+  useEffect(() => {
+    if (user == null) setLike(false);
 
-      if (
-        data?.likes &&
-        data?.likes[0]?.user?.id !== undefined &&
-        data?.likes[0]?.user?.id === user?.id
-      ) {
-        setLike(true);
-        setLikeId(data?.likes[0].id);
-      }
-    }, [user, data?.likes[0]?.user?.id]);
-  }
+    if (
+      data?.likes &&
+      data?.likes[0]?.user?.id !== undefined &&
+      data?.likes[0]?.user?.id === user?.id
+    ) {
+      setLike(true);
+      setLikeId(data?.likes[0].id);
+    }
+  }, [data?.likes, user]);
 
   const handleCreateLike = useCallback(
     async (tweetId: string) => {
@@ -72,7 +70,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
       setLike(false);
       setLikeId("");
     }
-  }, [queryClient, user, likeId]);
+  }, [likeId]);
 
   return (
     <div className="border border-l-0 border-r-0 border-b-0 border-gray-600 p-5 hover:bg-slate-900 translate-all cursor-pointer">
