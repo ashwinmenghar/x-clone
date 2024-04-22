@@ -54,7 +54,7 @@ const FeedCard: React.FC<FeedCardProps> = (props) => {
         setLikeId(likeData?.createLike?.id as string);
       }
     },
-    [queryClient, user, likeId]
+    [user, like]
   );
 
   const handleUnLike = useCallback(async () => {

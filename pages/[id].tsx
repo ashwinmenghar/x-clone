@@ -48,7 +48,7 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
     await queryClient.invalidateQueries([
       "curent-user",
     ] as InvalidateQueryFilters);
-  }, [props.userInfo?.id, queryClient]);
+  }, [currentUser, props.userInfo?.id, queryClient]);
 
   const handleUnfollowUser = useCallback(async () => {
     if (currentUser == null) {
@@ -65,7 +65,7 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
     await queryClient.invalidateQueries([
       "curent-user",
     ] as InvalidateQueryFilters);
-  }, [props.userInfo?.id, queryClient]);
+  }, [currentUser, props.userInfo?.id, queryClient]);
 
   return (
     <div>
@@ -142,14 +142,11 @@ export const getServerSideProps: GetServerSideProps<ServerProps> = async (
   context
 ) => {
   const id = context.query.id as string | undefined;
-  const userCookiesInfo = context.req.cookies.__user_info;
-  const { id: userId } = JSON.parse(userCookiesInfo || "");
 
   if (!id) return { notFound: true, props: { userInfo: undefined } };
 
   const userInfo = await graphqlClient.request(getUserByIdQuery, {
     id,
-    userId,
   });
 
   if (!userInfo?.getUserById) return { notFound: true };

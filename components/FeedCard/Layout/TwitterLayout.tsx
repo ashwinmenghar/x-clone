@@ -122,10 +122,9 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
     window.localStorage.removeItem("__twitter_token");
 
     queryClient.invalidateQueries({ queryKey: ["current-user"] });
-    Cookies.remove("__user_info");
 
     toast.success("Sign Out", { id: "signout" });
-  }, []);
+  }, [queryClient]);
 
   const handleLoginWithGoogle = useCallback(
     async (cred: CredentialResponse) => {
@@ -146,25 +145,9 @@ const TwitterLayout: React.FC<TwitterLayoutProps> = (props) => {
 
       await queryClient.invalidateQueries({ queryKey: ["current-user"] });
       await queryClient.invalidateQueries({ queryKey: ["all-tweets"] });
-
-      handleUserInfoStorage();
     },
     [queryClient]
   );
-
-  const handleUserInfoStorage = () => {
-    Cookies.set(
-      "__user_info",
-      JSON.stringify({
-        id: user?.id,
-        firstName: user?.firstName,
-        lastName: user?.lastName,
-        email: user?.email,
-        username: user?.username,
-      }),
-      { expires: 7 }
-    );
-  };
 
   useEffect(() => {
     const handleNewsData = async () => {

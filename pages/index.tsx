@@ -126,7 +126,7 @@ export default function Home(props: HomeProps) {
 
   useEffect(() => {
     if (inView) loadMoreTweets();
-  }, [inView]);
+  }, [inView, loadMoreTweets]);
 
   return (
     <div>
