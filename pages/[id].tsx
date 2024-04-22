@@ -14,14 +14,17 @@ import {
 } from "@/graphql/mutation/user";
 import { InvalidateQueryFilters, useQueryClient } from "@tanstack/react-query";
 import { graphqlClient } from "@/client/api";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import { cookies } from "next/headers";
 
 interface ServerProps {
   userInfo?: User;
 }
 
 const UserProfilePage: NextPage<ServerProps> = (props) => {
-  const router = useRouter();
   const { user: currentUser } = useCurrentUser();
+
   const queryClient = useQueryClient();
 
   const amIFollowing = useMemo(() => {
@@ -34,6 +37,11 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
   }, [currentUser?.following, props.userInfo]);
 
   const handleFollowUser = useCallback(async () => {
+    if (currentUser == null) {
+      toast.error("You need to login first", { duration: 3000 });
+      return;
+    }
+
     if (!props.userInfo?.id) return;
 
     await graphqlClient.request(followUserMutation, { to: props.userInfo?.id });
@@ -43,11 +51,17 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
   }, [props.userInfo?.id, queryClient]);
 
   const handleUnfollowUser = useCallback(async () => {
+    if (currentUser == null) {
+      toast.error("You need to login first", { duration: 3000 });
+      return;
+    }
+
     if (!props.userInfo?.id) return;
 
     await graphqlClient.request(unfollowUserMutation, {
       to: props.userInfo?.id,
     });
+
     await queryClient.invalidateQueries([
       "curent-user",
     ] as InvalidateQueryFilters);
@@ -58,7 +72,9 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
       <Twitterlayout>
         <div>
           <nav className="flex items-center gap-3 py-3 px-3">
-            <BsArrowLeftShort className="text-4xl" />
+            <Link href={"/"} shallow>
+              <BsArrowLeftShort className="text-4xl cursor-pointer" />
+            </Link>
             <div>
               <h1 className="text-2xl font-bold">
                 {props.userInfo?.firstName} {props.userInfo?.lastName}
@@ -109,7 +125,11 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
           </div>
           <div>
             {props.userInfo?.tweets?.map((tweet) => (
-              <FeedCard data={tweet as Tweet} key={tweet?.id} />
+              <FeedCard
+                data={tweet as Tweet}
+                key={tweet?.id}
+                user={currentUser as User}
+              />
             ))}
           </div>
         </div>
@@ -122,10 +142,15 @@ export const getServerSideProps: GetServerSideProps<ServerProps> = async (
   context
 ) => {
   const id = context.query.id as string | undefined;
+  const userCookiesInfo = context.req.cookies.__user_info;
+  const { id: userId } = JSON.parse(userCookiesInfo || "");
 
   if (!id) return { notFound: true, props: { userInfo: undefined } };
 
-  const userInfo = await graphqlClient.request(getUserByIdQuery, { id });
+  const userInfo = await graphqlClient.request(getUserByIdQuery, {
+    id,
+    userId,
+  });
 
   if (!userInfo?.getUserById) return { notFound: true };
 

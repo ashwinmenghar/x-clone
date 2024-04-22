@@ -2,11 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: [
-      "ashwin-portfolio-site.netlify.app",
-      "lh3.googleusercontent.com",
-      "ashwin-twitter-dev.s3.ap-south-1.amazonaws.com",
-      "i.imgur.com",
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
     ],
   },
 };
